@@ -1,8 +1,6 @@
-Django
-channels
-daphne
-Pillow
-whitenoise
-gunicorn
-psycopg2-binary
-dj-database-url
+Django==5.2.14
+whitenoise==6.9.0
+dj-database-url==2.3.0
+psycopg2-binary==2.9.10
+Pillow==11.1.0
+razorpay==1.4.2

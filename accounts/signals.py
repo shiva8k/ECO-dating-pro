@@ -13,7 +13,6 @@ def create_or_save_user_profile(sender, instance, created, **kwargs):
     else:
         Profile.objects.get_or_create(user=instance)
         PremiumSubscription.objects.get_or_create(user=instance)
-        instance.profile.save()
 
 
 @receiver(post_save, sender=Match)

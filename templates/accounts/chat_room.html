@@ -23,7 +23,7 @@
 
             <div id="chatMessages" class="chat-messages">
                 {% for message in room_messages %}
-                    <div class="message-row {% if message.sender == user %}message-row-own{% endif %}">
+                    <div class="message-row {% if message.sender == user %}message-row-own{% endif %}" data-message-id="{{ message.id }}">
                         <div class="message-bubble">
                             <p class="mb-1">{{ message.content }}</p>
                             <span>{{ message.sender.username }} · {{ message.created_at|date:"M d, g:i A" }}</span>
@@ -32,12 +32,13 @@
                 {% empty %}
                     <div id="emptyChatState" class="empty-chat text-center">
                         <h2 class="h5 text-white">Start the conversation</h2>
-                        <p class="text-white-50 mb-0">Messages appear here instantly for both matched students.</p>
+                        <p class="text-white-50 mb-0">Send a message to begin chatting with your match.</p>
                     </div>
                 {% endfor %}
             </div>
 
             <form id="chatForm" class="chat-form">
+                {% csrf_token %}
                 <input id="chatInput" type="text" autocomplete="off" placeholder="Message {{ matched_user.username }}" maxlength="1000">
                 <button class="btn btn-glass" type="submit">Send</button>
             </form>
@@ -47,20 +48,28 @@
 
 {{ room.id|json_script:"room-id" }}
 {{ user.username|json_script:"current-username" }}
+{{ last_message_id|json_script:"last-message-id" }}
 <script>
     const roomId = JSON.parse(document.getElementById("room-id").textContent);
     const currentUsername = JSON.parse(document.getElementById("current-username").textContent);
-    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const chatSocket = new WebSocket(`${protocol}://${window.location.host}/ws/chat/${roomId}/`);
+    let lastMessageId = JSON.parse(document.getElementById("last-message-id").textContent);
+    const sendUrl = `/accounts/chats/${roomId}/send/`;
+    const pollUrl = `/accounts/chats/${roomId}/messages/`;
     const chatMessages = document.getElementById("chatMessages");
     const chatForm = document.getElementById("chatForm");
     const chatInput = document.getElementById("chatInput");
+    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
     function scrollToLatestMessage() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     function addMessage(data) {
+        if (data.id <= lastMessageId) {
+            return;
+        }
+        lastMessageId = data.id;
+
         const emptyState = document.getElementById("emptyChatState");
         if (emptyState) {
             emptyState.remove();
@@ -68,6 +77,7 @@
 
         const row = document.createElement("div");
         row.className = data.sender === currentUsername ? "message-row message-row-own" : "message-row";
+        row.dataset.messageId = data.id;
 
         const bubble = document.createElement("div");
         bubble.className = "message-bubble";
@@ -86,20 +96,46 @@
         scrollToLatestMessage();
     }
 
-    chatSocket.onmessage = function(event) {
-        addMessage(JSON.parse(event.data));
-    };
+    async function sendMessage(message) {
+        const response = await fetch(sendUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken,
+            },
+            body: JSON.stringify({ message }),
+        });
+        if (!response.ok) {
+            return;
+        }
+        const data = await response.json();
+        addMessage(data);
+    }
 
-    chatForm.addEventListener("submit", function(event) {
+    async function pollMessages() {
+        try {
+            const response = await fetch(`${pollUrl}?after=${lastMessageId}`);
+            if (!response.ok) {
+                return;
+            }
+            const data = await response.json();
+            data.messages.forEach(addMessage);
+        } catch (error) {
+            // Ignore transient network errors during polling.
+        }
+    }
+
+    chatForm.addEventListener("submit", async function (event) {
         event.preventDefault();
         const message = chatInput.value.trim();
         if (!message) {
             return;
         }
-        chatSocket.send(JSON.stringify({ message }));
         chatInput.value = "";
+        await sendMessage(message);
     });
 
     scrollToLatestMessage();
+    setInterval(pollMessages, 3000);
 </script>
 {% endblock %}

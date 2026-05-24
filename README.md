@@ -19,7 +19,7 @@ Open http://127.0.0.1:8000 in your browser.
 ### Root files
 
 - `manage.py` is Django's command-line helper. You use it to run the server, create database tables, make apps, and open the admin.
-- `requirements.txt` lists Python packages this project needs. It includes Django, Pillow for profile pictures, Channels and Daphne for WebSockets, Razorpay for payments, and a compatible Setuptools version required by the Razorpay SDK.
+- `requirements.txt` lists Python packages: Django, Gunicorn, Whitenoise, PostgreSQL drivers, Pillow, and Razorpay.
 - `.gitignore` tells Git which local files to ignore, such as virtual environments, cache files, and the SQLite database.
 - `README.md` is this guide. It explains how to run the project and what each generated file does.
 
@@ -28,8 +28,8 @@ Open http://127.0.0.1:8000 in your browser.
 - `ECO/__init__.py` marks the folder as a Python package.
 - `ECO/settings.py` contains the project settings: installed apps, database, templates, static files, login redirects, and security basics.
 - `ECO/urls.py` is the main URL router. It connects browser paths like `/`, `/accounts/`, and `/admin/` to the correct app.
-- `ECO/asgi.py` is the ASGI entry point. ASGI lets Django handle both normal web pages and WebSocket connections for real-time chat.
-- `ECO/wsgi.py` is an entry point for WSGI servers. It is commonly used when deploying Django.
+- `ECO/wsgi.py` is the WSGI entry point used by Gunicorn, Vercel, and Railway.
+- `ECO/settings.py` reads `DATABASE_URL` for Neon PostgreSQL in production and falls back to SQLite locally.
 
 ### `core/` homepage app
 
@@ -45,8 +45,7 @@ Open http://127.0.0.1:8000 in your browser.
 - `accounts/models.py` defines the profile, matching, chat, notification, premium, subscription, and payment database models.
 - `accounts/admin.py` makes profiles, likes/passes, matches, chat rooms, chat messages, notifications, premium plans, subscriptions, and payments manageable from Django admin.
 - `accounts/signals.py` automatically creates a profile whenever a new user account is created.
-- `accounts/consumers.py` handles WebSocket chat. A consumer is like a view for real-time connections.
-- `accounts/routing.py` maps WebSocket URLs such as `/ws/chat/1/` to the chat consumer.
+- `accounts/chat_service.py` saves chat messages and notifications (HTTP-based chat for serverless deploys).
 - `accounts/payments.py` contains Razorpay helper functions for creating orders and verifying payment signatures.
 - `accounts/forms.py` defines the signup form and profile edit form. Forms turn model fields into safe HTML inputs.
 - `accounts/context_processors.py` gives every template the unread notification count, so the navbar can show a badge.
@@ -63,7 +62,7 @@ Open http://127.0.0.1:8000 in your browser.
 - `templates/accounts/explore.html` shows all other student profiles with Like and Pass buttons.
 - `templates/accounts/matches.html` shows students who mutually liked the logged-in user.
 - `templates/accounts/chat_list.html` shows all chat rooms for the logged-in user's matches.
-- `templates/accounts/chat_room.html` shows one real-time chat room and contains the browser JavaScript that opens the WebSocket.
+- `templates/accounts/chat_room.html` shows one chat room with HTTP send + polling (works on Vercel/Railway).
 - `templates/accounts/notifications.html` shows likes, matches, and message notifications, with a button to mark them as read.
 - `templates/accounts/premium_plans.html` shows available premium subscription plans.
 - `templates/accounts/payment_checkout.html` opens Razorpay Checkout for a selected plan.
@@ -89,14 +88,13 @@ py manage.py createsuperuser
 py manage.py runserver
 ```
 
-## Real-Time Chat Setup
+## Production deployment
 
-The chat system uses Django Channels and WebSockets.
+See **[DEPLOY.md](DEPLOY.md)** for step-by-step Vercel and Railway deployment with Neon PostgreSQL.
 
-1. `channels` lets Django understand WebSocket connections.
-2. `daphne` lets `py manage.py runserver` serve both normal pages and WebSockets during development.
-3. `CHANNEL_LAYERS` in `ECO/settings.py` uses an in-memory layer. This is fine for learning and local development.
-4. For production, replace the in-memory layer with Redis using `channels_redis`.
+## Chat
+
+Chat uses standard HTTP (POST to send, polling every 3 seconds for new messages). No WebSockets required — works on serverless hosts.
 
 Run the app normally:
 
@@ -108,7 +106,7 @@ Chat URLs:
 
 - `/accounts/chats/` shows your chat list.
 - `/accounts/chats/<room_id>/` opens a chat room.
-- `/ws/chat/<room_id>/` is the WebSocket URL used internally by the browser.
+- Chat uses HTTP POST + polling (no WebSocket URL required).
 
 ## Notifications Setup
 

@@ -1,12 +1,15 @@
+import json
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 from .forms import (
     OnboardingStepFourForm,
@@ -16,6 +19,7 @@ from .forms import (
     ProfileForm,
     SignUpForm,
 )
+from .chat_service import save_chat_message, serialize_chat_message
 from .matching import INTEREST_CHOICES, get_explore_profiles, profiles_are_compatible
 from .models import (
     ChatRoom,
@@ -332,6 +336,7 @@ def chat_room(request, room_id):
     matched_user = room.other_user(request.user)
     profile, _ = Profile.objects.get_or_create(user=matched_user)
     room_messages = room.messages.select_related("sender").order_by("created_at")
+    last_message = room_messages.last()
     return render(
         request,
         "accounts/chat_room.html",
@@ -340,7 +345,51 @@ def chat_room(request, room_id):
             "matched_user": matched_user,
             "profile": profile,
             "room_messages": room_messages,
+            "last_message_id": last_message.id if last_message else 0,
         },
+    )
+
+
+@login_required
+@require_POST
+def send_chat_message(request, room_id):
+    room = get_object_or_404(ChatRoom, id=room_id)
+    if not room.has_member(request.user):
+        return JsonResponse({"error": "Forbidden"}, status=403)
+
+    try:
+        if request.content_type == "application/json":
+            payload = json.loads(request.body.decode("utf-8"))
+            content = payload.get("message", "")
+        else:
+            content = request.POST.get("message", "")
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    chat_message = save_chat_message(room, request.user, content)
+    if chat_message is None:
+        return JsonResponse({"error": "Message cannot be empty."}, status=400)
+
+    return JsonResponse(serialize_chat_message(chat_message))
+
+
+@login_required
+@require_GET
+def chat_messages_poll(request, room_id):
+    room = get_object_or_404(ChatRoom, id=room_id)
+    if not room.has_member(request.user):
+        return JsonResponse({"error": "Forbidden"}, status=403)
+
+    try:
+        after_id = int(request.GET.get("after", 0))
+    except (TypeError, ValueError):
+        after_id = 0
+
+    new_messages = room.messages.filter(id__gt=after_id).select_related("sender").order_by("created_at")
+    return JsonResponse(
+        {
+            "messages": [serialize_chat_message(message) for message in new_messages],
+        }
     )
 
 
