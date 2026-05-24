@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Chats | ECO{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="page-heading text-center mx-auto mb-5">
+            <p class="hero-kicker mx-auto mb-3">Real-time chat</p>
+            <h1 class="display-5 fw-bold text-white mb-3">Your conversations</h1>
+            <p class="text-white-75 mb-0">Chat rooms appear automatically when two students match.</p>
+        </div>
+
+        {% if chat_cards %}
+            <div class="chat-list mx-auto">
+                {% for card in chat_cards %}
+                    <a class="chat-list-item" href="{{ card.room.get_absolute_url }}">
+                        {% if card.profile.profile_picture %}
+                            <img class="chat-avatar" src="{{ card.profile.profile_picture.url }}" alt="{{ card.user.username }} profile picture">
+                        {% else %}
+                            <div class="chat-avatar-placeholder">{{ card.user.username|slice:":1"|upper }}</div>
+                        {% endif %}
+                        <div class="min-w-0 flex-grow-1">
+                            <div class="d-flex justify-content-between gap-3">
+                                <h2 class="h5 text-white mb-1">{{ card.user.username }}</h2>
+                                {% if card.last_message %}
+                                    <span class="chat-time">{{ card.last_message.created_at|date:"M d, g:i A" }}</span>
+                                {% endif %}
+                            </div>
+                            {% if card.last_message %}
+                                <p class="text-white-50 mb-0 text-truncate">{{ card.last_message.sender.username }}: {{ card.last_message.content }}</p>
+                            {% else %}
+                                <p class="text-white-50 mb-0">No messages yet. Say hi.</p>
+                            {% endif %}
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state mx-auto text-center">
+                <h2 class="h4 text-white">No chat rooms yet</h2>
+                <p class="text-white-50 mb-4">Match with another student to start a real-time chat.</p>
+                <a class="btn btn-glass" href="{% url 'explore_profiles' %}">Explore profiles</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

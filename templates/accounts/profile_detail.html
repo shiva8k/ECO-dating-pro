@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile_user.username }} | ECO Profile{% endblock %}
+
+{% block content %}
+<section class="profile-hero py-5">
+    <div class="container">
+        <div class="row g-4 align-items-stretch">
+            <div class="col-lg-4">
+                <aside class="profile-card-large h-100 text-center">
+                    {% if profile.profile_picture %}
+                        <img class="profile-photo-xl" src="{{ profile.profile_picture.url }}" alt="{{ profile_user.username }} profile picture">
+                    {% else %}
+                        <div class="profile-photo-placeholder">{{ profile_user.username|slice:":1"|upper }}</div>
+                    {% endif %}
+                    <h1 class="h3 text-white mt-4 mb-1">
+                        {{ profile_user.username }}
+                        {% if profile.age %}, {{ profile.age }}{% endif %}
+                        {% if subscription.is_valid %}
+                            <span class="premium-badge">Premium</span>
+                        {% endif %}
+                    </h1>
+                    <p class="text-white-50 mb-2">{{ profile.college_name|default:"College not added yet" }}</p>
+                    {% if profile.get_looking_for_display_label %}
+                        <p class="text-white-50 mb-4">{{ profile.get_looking_for_display_label }}</p>
+                    {% else %}
+                        <p class="text-white-50 mb-4">{{ profile.department|default:"Department not added yet" }}</p>
+                    {% endif %}
+                    {% if is_owner %}
+                        <a class="btn btn-glass w-100" href="{% url 'edit_profile' %}">Edit profile</a>
+                    {% endif %}
+                </aside>
+            </div>
+            <div class="col-lg-8">
+                <article class="profile-card-large h-100">
+                    <div class="d-flex flex-wrap justify-content-between gap-3 mb-4">
+                        <div>
+                            <p class="hero-kicker mb-3">ECO campus profile</p>
+                            <h2 class="display-6 fw-bold text-white mb-0">About {{ profile_user.username }}</h2>
+                        </div>
+                    </div>
+
+                    <div class="profile-info-grid mb-4">
+                        <div>
+                            <span>College</span>
+                            <strong>{{ profile.college_name|default:"Not added yet" }}</strong>
+                        </div>
+                        <div>
+                            <span>Gender</span>
+                            <strong>{{ profile.get_gender_display_label|default:"Not added yet" }}</strong>
+                        </div>
+                        <div>
+                            <span>Interested in</span>
+                            <strong>{{ profile.get_interested_in_display_label|default:"Not added yet" }}</strong>
+                        </div>
+                        <div>
+                            <span>Looking for</span>
+                            <strong>{{ profile.get_looking_for_display_label|default:"Not added yet" }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white">Bio</h3>
+                        <p class="text-white-75 mb-0">{{ profile.bio|default:"This student has not added a bio yet." }}</p>
+                    </div>
+
+                    <div>
+                        <h3 class="h5 text-white">Interests</h3>
+                        {% if interests %}
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for interest in interests %}
+                                    <span class="interest-chip">{{ interest }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-white-50 mb-0">No interests added yet.</p>
+                        {% endif %}
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

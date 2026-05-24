@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout | ECO Premium{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card text-center">
+        <p class="hero-kicker mx-auto mb-3">Secure checkout</p>
+        <h1 class="h3 text-white mb-2">{{ plan.name }}</h1>
+        <p class="premium-price mb-4">₹{{ plan.price_inr }}<span>/month</span></p>
+        <button id="rzp-button" class="btn btn-glass w-100" type="button">Pay with Razorpay</button>
+        <a class="btn btn-ghost w-100 mt-3" href="{% url 'premium_plans' %}">Cancel</a>
+    </div>
+</section>
+
+<form id="payment-success-form" method="post" action="{% url 'payment_success' %}" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+    <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+    <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+</form>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    const options = {
+        key: "{{ razorpay_key_id }}",
+        amount: "{{ order.amount }}",
+        currency: "{{ order.currency }}",
+        name: "ECO Premium",
+        description: "{{ plan.name }}",
+        order_id: "{{ order.id }}",
+        handler: function(response) {
+            document.getElementById("razorpay_payment_id").value = response.razorpay_payment_id;
+            document.getElementById("razorpay_order_id").value = response.razorpay_order_id;
+            document.getElementById("razorpay_signature").value = response.razorpay_signature;
+            document.getElementById("payment-success-form").submit();
+        },
+        modal: {
+            ondismiss: function() {
+                window.location.href = "{% url 'payment_failure' %}";
+            }
+        },
+        theme: {
+            color: "#5865f2"
+        }
+    };
+
+    document.getElementById("rzp-button").onclick = function(event) {
+        event.preventDefault();
+        new Razorpay(options).open();
+    };
+</script>
+{% endblock %}

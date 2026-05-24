@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}ECO | College Social Matching{% endblock %}
+
+{% block content %}
+<section class="home-hero">
+    <div class="container">
+        <div class="home-hero-content mx-auto text-center">
+            <p class="hero-kicker mx-auto mb-4">College social matching</p>
+            <h1 class="hero-title text-white mb-4">Find your campus people.</h1>
+            <p class="hero-copy text-white-75 mx-auto mb-5">
+                ECO helps students meet friends, study partners, event crews, and project teammates through shared interests and college life.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                {% if user.is_authenticated %}
+                    <a class="btn btn-glass btn-lg" href="{% url 'my_profile' %}">Open profile</a>
+                    <a class="btn btn-ghost btn-lg" href="{% url 'explore_profiles' %}">Explore matches</a>
+                {% else %}
+                    <a class="btn btn-glass btn-lg" href="{% url 'signup' %}">Create profile</a>
+                    <a class="btn btn-ghost btn-lg" href="{% url 'login' %}">Log in</a>
+                {% endif %}
+            </div>
+            <div class="hero-note mt-5">
+                <span>Built for friendships</span>
+                <span>Study groups</span>
+                <span>Campus events</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

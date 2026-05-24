@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Set up your profile | ECO{% endblock %}
+
+{% block content %}
+<section class="onboarding-shell" data-step="{{ step }}">
+    <div class="onboarding-container">
+        <header class="onboarding-header">
+            <p class="hero-kicker mb-2">Step {{ step }} of {{ total_steps }}</p>
+            <h1 class="onboarding-title">
+                {% if step == 1 %}Who are you on campus?
+                {% elif step == 2 %}Tell us about you
+                {% elif step == 3 %}What are you into?
+                {% else %}Add your best photo{% endif %}
+            </h1>
+            <p class="onboarding-subtitle text-white-50">
+                {% if step == 1 %}Help ECO show you the right people.
+                {% elif step == 2 %}Your college and bio help others connect with your vibe.
+                {% elif step == 3 %}Pick everything that fits — we'll prioritize shared interests.
+                {% else %}Profiles with photos get more matches.{% endif %}
+            </p>
+        </header>
+
+        <div class="onboarding-progress" aria-hidden="true">
+            <div class="onboarding-progress-bar" style="width: {{ progress_percent }}%;"></div>
+        </div>
+
+        <div class="onboarding-card onboarding-step-panel">
+            <form method="post" enctype="multipart/form-data" class="onboarding-form">
+                {% csrf_token %}
+
+                {% if step == 1 %}
+                    <div class="onboarding-field-group">
+                        <label class="onboarding-label">Gender</label>
+                        <div class="onboarding-choice-grid">
+                            {% for radio in form.gender %}
+                                <label class="onboarding-choice-card">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.gender.errors %}<p class="onboarding-error">{{ error }}</p>{% endfor %}
+                    </div>
+                    <div class="onboarding-field-group">
+                        <label class="onboarding-label">Interested in</label>
+                        <div class="onboarding-choice-grid">
+                            {% for radio in form.interested_in %}
+                                <label class="onboarding-choice-card">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.interested_in.errors %}<p class="onboarding-error">{{ error }}</p>{% endfor %}
+                    </div>
+                    <div class="onboarding-field-group">
+                        <label class="onboarding-label">Looking for</label>
+                        <div class="onboarding-choice-grid onboarding-choice-grid-wide">
+                            {% for radio in form.looking_for %}
+                                <label class="onboarding-choice-card">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.looking_for.errors %}<p class="onboarding-error">{{ error }}</p>{% endfor %}
+                    </div>
+                    <div class="onboarding-field-group">
+                        <label class="onboarding-label" for="{{ form.age.id_for_label }}">Age</label>
+                        {{ form.age }}
+                        {% for error in form.age.errors %}<p class="onboarding-error">{{ error }}</p>{% endfor %}
+                    </div>
+
+                {% elif step == 2 %}
+                    <div class="onboarding-field-group">
+                        <label class="onboarding-label" for="{{ form.college_name.id_for_label }}">College</label>
+                        {{ form.college_name }}
+                        {% for error in form.college_name.errors %}<p class="onboarding-error">{{ error }}</p>{% endfor %}
+                    </div>
+                    <div class="onboarding-field-group">
+                        <label class="onboarding-label" for="{{ form.bio.id_for_label }}">Bio</label>
+                        {{ form.bio }}
+                        {% for error in form.bio.errors %}<p class="onboarding-error">{{ error }}</p>{% endfor %}
+                    </div>
+
+                {% elif step == 3 %}
+                    <div class="onboarding-field-group">
+                        <div class="onboarding-chip-grid">
+                            {% for checkbox in form.interests %}
+                                <label class="onboarding-chip">{{ checkbox.tag }}<span>{{ checkbox.choice_label }}</span></label>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.interests.errors %}<p class="onboarding-error">{{ error }}</p>{% endfor %}
+                        {% if form.non_field_errors %}
+                            {% for error in form.non_field_errors %}<p class="onboarding-error">{{ error }}</p>{% endfor %}
+                        {% endif %}
+                    </div>
+
+                {% else %}
+                    <div class="onboarding-field-group onboarding-photo-step">
+                        <label class="onboarding-photo-drop" for="{{ form.profile_picture.id_for_label }}">
+                            <span class="onboarding-photo-icon">+</span>
+                            <span>Upload profile picture</span>
+                            {{ form.profile_picture }}
+                        </label>
+                        {% for error in form.profile_picture.errors %}<p class="onboarding-error">{{ error }}</p>{% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="onboarding-actions">
+                    {% if step > 1 %}
+                        <a class="btn btn-ghost" href="{% url 'onboarding' %}?step={{ step|add:'-1' }}">Back</a>
+                    {% endif %}
+                    <button class="btn btn-glass" type="submit">
+                        {% if step == total_steps %}Finish{% else %}Continue{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<script>
+document.querySelectorAll('.onboarding-choice-card input, .onboarding-chip input').forEach((input) => {
+    const sync = () => {
+        const group = input.type === 'radio'
+            ? document.querySelectorAll(`input[name="${input.name}"]`)
+            : [input];
+        if (input.type === 'radio') {
+            document.querySelectorAll(`input[name="${input.name}"]`).forEach((el) => {
+                el.closest('.onboarding-choice-card')?.classList.toggle('is-selected', el.checked);
+            });
+        } else {
+            input.closest('.onboarding-chip')?.classList.toggle('is-selected', input.checked);
+        }
+    };
+    input.addEventListener('change', sync);
+    sync();
+});
+</script>
+{% endblock %}

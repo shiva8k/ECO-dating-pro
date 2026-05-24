@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Payment History | ECO{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="page-heading text-center mx-auto mb-5">
+            <p class="hero-kicker mx-auto mb-3">Billing</p>
+            <h1 class="display-5 fw-bold text-white mb-3">Payment history</h1>
+            {% if subscription.is_valid %}
+                <p class="text-white-75 mb-0">Premium active until {{ subscription.expires_at|date:"M d, Y" }}.</p>
+            {% else %}
+                <p class="text-white-75 mb-0">You do not have an active premium subscription.</p>
+            {% endif %}
+        </div>
+
+        <div class="payment-table mx-auto">
+            {% for payment in payments %}
+                <article class="payment-row">
+                    <div>
+                        <h2 class="h6 text-white mb-1">{{ payment.plan.name|default:"Premium plan" }}</h2>
+                        <p class="text-white-50 mb-0">{{ payment.created_at|date:"M d, Y, g:i A" }}</p>
+                    </div>
+                    <strong class="text-white">₹{{ payment.amount_inr }}</strong>
+                    <span class="status-pill">{{ payment.status|title }}</span>
+                </article>
+            {% empty %}
+                <div class="empty-state text-center mx-auto">
+                    <h2 class="h4 text-white">No payments yet</h2>
+                    <p class="text-white-50 mb-4">Your premium payments will appear here.</p>
+                    <a class="btn btn-glass" href="{% url 'premium_plans' %}">View plans</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

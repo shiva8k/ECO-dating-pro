@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Failed | ECO{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card text-center">
+        <p class="hero-kicker mx-auto mb-3">Payment status</p>
+        <h1 class="h3 text-white mb-3">Payment was not completed</h1>
+        <p class="text-white-75 mb-4">Your premium subscription was not activated. You can try again anytime.</p>
+        <a class="btn btn-glass w-100" href="{% url 'premium_plans' %}">Try again</a>
+    </div>
+</section>
+{% endblock %}

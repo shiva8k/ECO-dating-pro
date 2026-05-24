@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile | ECO{% endblock %}
+
+{% block content %}
+<section class="auth-section profile-edit-section">
+    <div class="auth-card profile-edit-card">
+        <h1 class="h3 text-white mb-2">Edit your ECO profile</h1>
+        <p class="text-white-50 mb-4">Update how you show up on campus and in explore.</p>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="mb-3 {% if field.name == 'interest_selection' %}profile-interests-edit{% endif %}">
+                    <label class="form-label text-white" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {% if field.name == 'interest_selection' %}
+                        <div class="onboarding-chip-grid profile-edit-chips">
+                            {% for checkbox in field %}
+                                <label class="onboarding-chip">{{ checkbox.tag }}<span>{{ checkbox.choice_label }}</span></label>
+                            {% endfor %}
+                        </div>
+                    {% elif field.name == "gender" or field.name == "interested_in" or field.name == "looking_for" %}
+                        <div class="onboarding-choice-grid {% if field.name == 'looking_for' %}onboarding-choice-grid-wide{% endif %}">
+                            {% for radio in field %}
+                                <label class="onboarding-choice-card">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                    {% if field.help_text %}
+                        <div class="form-text text-white-50">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <div class="d-flex flex-wrap gap-3 mt-4">
+                <button class="btn btn-glass" type="submit">Save profile</button>
+                <a class="btn btn-ghost" href="{% url 'my_profile' %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+<script>
+document.querySelectorAll('.profile-edit-chips .onboarding-chip input, .onboarding-choice-card input').forEach((input) => {
+    const sync = () => {
+        if (input.type === 'radio') {
+            document.querySelectorAll(`input[name="${input.name}"]`).forEach((el) => {
+                el.closest('.onboarding-choice-card')?.classList.toggle('is-selected', el.checked);
+            });
+        } else {
+            input.closest('.onboarding-chip')?.classList.toggle('is-selected', input.checked);
+        }
+    };
+    input.addEventListener('change', sync);
+    sync();
+});
+</script>
+{% endblock %}

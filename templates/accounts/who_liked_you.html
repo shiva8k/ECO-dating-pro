@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Who Liked You | ECO Premium{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="page-heading text-center mx-auto mb-5">
+            <p class="hero-kicker mx-auto mb-3">Premium feature</p>
+            <h1 class="display-5 fw-bold text-white mb-3">Students who liked you</h1>
+            <p class="text-white-75 mb-0">These students already showed interest in your profile.</p>
+        </div>
+
+        <div class="row g-4">
+            {% for like in likes %}
+                <div class="col-md-6 col-xl-4">
+                    <article class="discover-card h-100">
+                        <h2 class="h4 text-white">{{ like.from_user.username }}</h2>
+                        <p class="text-white-50">{{ like.from_user.profile.college_name|default:"College not added" }}</p>
+                        <p class="text-white-75">{{ like.from_user.profile.bio|default:"No bio added yet." }}</p>
+                        <a class="btn btn-ghost w-100" href="{{ like.from_user.profile.get_absolute_url }}">View profile</a>
+                    </article>
+                </div>
+            {% empty %}
+                <div class="empty-state mx-auto text-center">
+                    <h2 class="h4 text-white">No likes yet</h2>
+                    <p class="text-white-50 mb-0">When students like you, they will appear here.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
