@@ -10,6 +10,5 @@
       "src": "/(.*)",
       "dest": "ECO/wsgi.py"
     }
-  ],
-  "buildCommand": "python manage.py migrate"
+  ]
 }
