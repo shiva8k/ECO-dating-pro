@@ -5,94 +5,72 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}ECO{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="eco-dark-shell">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-eco sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'home' %}">
-                ECO
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">Home</a>
-                    </li>
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-xl border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="{% url 'home' %}" class="text-3xl font-black bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent hover:scale-105 transition-transform">
+                    ECO
+                </a>
+                
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="{% url 'home' %}" class="text-white/70 hover:text-white hover:scale-105 transition-all font-medium">Home</a>
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'explore_profiles' %}">Explore</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'matches_page' %}">Matches</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'chat_list' %}">Chats</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'premium_plans' %}">Premium</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link notification-nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Notifications
-                                <span class="notification-badge {% if not unread_notification_count %}notification-badge-empty{% endif %}">{{ unread_notification_count }}</span>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationsDropdown">
-                                <div class="notification-dropdown-header">
-                                    <strong>Notifications</strong>
-                                    <a href="{% url 'notifications_page' %}">View all</a>
-                                </div>
-                                {% if recent_notifications %}
-                                    {% for notification in recent_notifications %}
-                                        <div class="notification-dropdown-item {% if not notification.is_read %}notification-unread{% endif %}">
-                                            <div class="notification-icon notification-icon-sm">
-                                                {% if notification.notification_type == "like" %}L{% elif notification.notification_type == "match" %}M{% else %}C{% endif %}
-                                            </div>
-                                            <div class="min-w-0">
-                                                <p class="mb-1 text-white">{{ notification.title }}</p>
-                                                <p class="mb-1 text-white-50 small text-truncate">{{ notification.message }}</p>
-                                                <span class="notification-time">{{ notification.timestamp|date:"M d, g:i A" }}</span>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="notification-dropdown-empty">No notifications yet.</div>
-                                {% endif %}
-                            </div>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'my_profile' %}">Profile</a>
-                        </li>
-                        <li class="nav-item">
-                            <span class="nav-link text-white-50">Hi, {{ user.username }}</span>
-                        </li>
-                        <li class="nav-item">
-                            <form method="post" action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button class="btn btn-ghost btn-sm" type="submit">Log out</button>
-                            </form>
-                        </li>
+                        <a href="{% url 'explore_profiles' %}" class="text-white/70 hover:text-white hover:scale-105 transition-all font-medium">Explore</a>
+                        <a href="{% url 'matches_page' %}" class="text-white/70 hover:text-white hover:scale-105 transition-all font-medium">Matches</a>
+                        <a href="{% url 'chat_list' %}" class="text-white/70 hover:text-white hover:scale-105 transition-all font-medium">Chats</a>
+                        <a href="{% url 'premium_plans' %}" class="text-white/70 hover:text-white hover:scale-105 transition-all font-medium">Premium</a>
+                        <a href="{% url 'my_profile' %}" class="text-white/70 hover:text-white hover:scale-105 transition-all font-medium">Profile</a>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="text-white/50 hover:text-white transition-colors font-medium">Log out</button>
+                        </form>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Log in</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-glass btn-sm" href="{% url 'signup' %}">Join ECO</a>
-                        </li>
+                        <a href="{% url 'login' %}" class="px-6 py-2.5 rounded-full border border-white/20 text-white font-semibold hover:bg-white/10 hover:border-pink-500/50 hover:shadow-[0_0_30px_rgba(236,72,153,0.3)] transition-all">Log in</a>
+                        <a href="{% url 'signup' %}" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white font-semibold hover:scale-105 hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] transition-all">Sign up</a>
                     {% endif %}
-                </ul>
+                </div>
+
+                <button id="mobileMenuBtn" class="md:hidden text-white p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobileMenu" class="hidden md:hidden bg-black/95 backdrop-blur-xl border-t border-white/10">
+            <div class="px-4 py-6 space-y-4">
+                <a href="{% url 'home' %}" class="block text-white/70 hover:text-white font-medium py-2">Home</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'explore_profiles' %}" class="block text-white/70 hover:text-white font-medium py-2">Explore</a>
+                    <a href="{% url 'matches_page' %}" class="block text-white/70 hover:text-white font-medium py-2">Matches</a>
+                    <a href="{% url 'chat_list' %}" class="block text-white/70 hover:text-white font-medium py-2">Chats</a>
+                    <a href="{% url 'premium_plans' %}" class="block text-white/70 hover:text-white font-medium py-2">Premium</a>
+                    <a href="{% url 'my_profile' %}" class="block text-white/70 hover:text-white font-medium py-2">Profile</a>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="block text-white/50 hover:text-white font-medium py-2 w-full text-left">Log out</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="block text-white/70 hover:text-white font-medium py-2">Log in</a>
+                    <a href="{% url 'signup' %}" class="block text-white font-semibold py-2">Sign up</a>
+                {% endif %}
             </div>
         </div>
     </nav>
 
-    <main>
+    <main class="pt-20">
         {% if messages %}
-            <div class="container mt-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags|default:'info' }} mb-2" role="alert">
+                    <div class="mb-2 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white backdrop-blur-sm">
                         {{ message }}
                     </div>
                 {% endfor %}
@@ -102,6 +80,6 @@
         {% block content %}{% endblock %}
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
 </body>
 </html>

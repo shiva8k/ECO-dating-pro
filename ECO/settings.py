@@ -91,12 +91,11 @@ TEMPLATES = [
 DATABASE_URL = (
     os.environ.get("DATABASE_URL", "").strip()
     or os.environ.get("POSTGRES_URL", "").strip()
-    or os.environ.get("NEON_DATABASE_URL", "").strip()
 )
 
 if IS_VERCEL and not DATABASE_URL:
     raise ImproperlyConfigured(
-        "DATABASE_URL is required on Vercel. Use Neon/Supabase PostgreSQL connection string."
+        "DATABASE_URL is required on Vercel. Use Railway PostgreSQL connection string."
     )
 
 if DATABASE_URL:
