@@ -160,10 +160,14 @@ class Notification(models.Model):
     LIKE = "like"
     MATCH = "match"
     MESSAGE = "message"
+    PROFILE_VIEW = "profile_view"
+    PREMIUM = "premium"
     TYPE_CHOICES = [
         (LIKE, "Like"),
         (MATCH, "Match"),
         (MESSAGE, "Message"),
+        (PROFILE_VIEW, "Profile View"),
+        (PREMIUM, "Premium"),
     ]
 
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")

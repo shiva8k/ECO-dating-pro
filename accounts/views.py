@@ -1,5 +1,6 @@
 import json
-
+from django.contrib.auth import authenticate, login, logout
+from .forms import LoginForm
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -20,6 +21,11 @@ from .forms import (
     SignUpForm,
 )
 from .chat_service import save_chat_message, serialize_chat_message
+from .notification_service import (
+    notify_premium_activated,
+    notify_profile_view,
+    serialize_notification,
+)
 from .matching import INTEREST_CHOICES, get_explore_profiles, profiles_are_compatible
 from .models import (
     ChatRoom,
@@ -37,6 +43,10 @@ ONBOARDING_STEPS = 4
 
 
 def signup(request):
+    print("=== SIGNUP VIEW CALLED ===")
+    print(f"Request method: {request.method}")
+    print(f"User authenticated: {request.user.is_authenticated}")
+    
     if request.user.is_authenticated:
         profile, _ = Profile.objects.get_or_create(user=request.user)
         if profile.needs_onboarding():
@@ -44,9 +54,15 @@ def signup(request):
         return redirect("home")
 
     if request.method == "POST":
+        print("POST RECEIVED")
+        print(f"POST data: {request.POST}")
         form = SignUpForm(request.POST)
+        print(f"Form valid: {form.is_valid()}")
+        if not form.is_valid():
+            print(f"Form errors: {form.errors}")
         if form.is_valid():
             user = form.save()
+            print(f"User created: {user.username}")
             login(request, user)
             messages.success(request, "Welcome to ECO. Let's set up your profile.")
             return redirect("onboarding")
@@ -126,6 +142,8 @@ def profile_detail(request, username):
     profile_user = get_object_or_404(User, username=username)
     profile, _ = Profile.objects.get_or_create(user=profile_user)
     subscription, _ = PremiumSubscription.objects.get_or_create(user=profile_user)
+    if request.user.is_authenticated and request.user != profile_user:
+        notify_profile_view(request.user, profile_user)
     return render(
         request,
         "accounts/profile_detail.html",
@@ -395,8 +413,25 @@ def chat_messages_poll(request, room_id):
 
 @login_required
 def notifications_page(request):
-    notifications = Notification.objects.filter(recipient=request.user).select_related("sender")
+    notifications = Notification.objects.filter(recipient=request.user).select_related(
+        "sender", "sender__profile"
+    )
     return render(request, "accounts/notifications.html", {"notifications": notifications})
+
+
+@login_required
+@require_GET
+def notifications_poll(request):
+    notifications = Notification.objects.filter(recipient=request.user).select_related(
+        "sender", "sender__profile"
+    )[:12]
+    unread_count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    return JsonResponse(
+        {
+            "unread_count": unread_count,
+            "notifications": [serialize_notification(n) for n in notifications],
+        }
+    )
 
 
 @login_required
@@ -495,6 +530,7 @@ def payment_success(request):
 
     subscription, _ = PremiumSubscription.objects.get_or_create(user=request.user)
     subscription.activate(payment.plan)
+    notify_premium_activated(request.user, payment.plan.name)
     messages.success(request, "Welcome to ECO Premium. Your subscription is active.")
     return redirect("payment_history")
 
@@ -526,3 +562,45 @@ def who_liked_you(request):
         "from_user__profile"
     )
     return render(request, "accounts/who_liked_you.html", {"likes": likes})
+
+def user_login(request):
+
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    form = LoginForm(request, data=request.POST or None)
+
+    if request.method == "POST":
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+
+            user = authenticate(
+                request,
+                username=username,
+                password=password
+            )
+
+            if user is not None:
+                login(request, user)
+
+                profile, _ = Profile.objects.get_or_create(user=user)
+
+                if profile.needs_onboarding():
+                    return redirect("onboarding")
+
+                return redirect("home")
+
+    return render(
+        request,
+        "accounts/login.html",
+        {"form": form}
+    )
+
+
+@login_required
+def user_logout(request):
+    logout(request)
+    return redirect("home")
+
+

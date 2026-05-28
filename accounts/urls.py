@@ -14,6 +14,7 @@ urlpatterns = [
     path("chats/<int:room_id>/send/", views.send_chat_message, name="send_chat_message"),
     path("chats/<int:room_id>/messages/", views.chat_messages_poll, name="chat_messages_poll"),
     path("notifications/", views.notifications_page, name="notifications_page"),
+    path("notifications/poll/", views.notifications_poll, name="notifications_poll"),
     path("notifications/<int:notification_id>/read/", views.mark_notification_read, name="mark_notification_read"),
     path("notifications/read/", views.mark_notifications_read, name="mark_notifications_read"),
     path("premium/", views.premium_plans, name="premium_plans"),
@@ -27,9 +28,9 @@ urlpatterns = [
     path("profile/edit/", views.edit_profile, name="edit_profile"),
     path("profile/<str:username>/", views.profile_detail, name="profile_detail"),
     path(
-        "login/",
-        auth_views.LoginView.as_view(template_name="registration/login.html"),
-        name="login",
-    ),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    "login/",
+    views.user_login,
+    name="login",
+),
+   path("logout/", views.user_logout, name="logout"),
 ]

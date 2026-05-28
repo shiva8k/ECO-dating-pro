@@ -3,31 +3,38 @@
 {% block title %}Who Liked You | ECO Premium{% endblock %}
 
 {% block content %}
-<section class="page-section">
-    <div class="container">
-        <div class="page-heading text-center mx-auto mb-5">
-            <p class="hero-kicker mx-auto mb-3">Premium feature</p>
-            <h1 class="display-5 fw-bold text-white mb-3">Students who liked you</h1>
-            <p class="text-white-75 mb-0">These students already showed interest in your profile.</p>
-        </div>
+<section class="py-10 sm:py-14 px-4 max-w-6xl mx-auto min-h-[calc(100vh-4.5rem)] fade-in-up">
+    <header class="text-center max-w-2xl mx-auto mb-10">
+        <p class="eco-kicker mb-2">Premium feature</p>
+        <h1 class="text-3xl font-black text-white mb-2">Who liked you</h1>
+        <p class="text-white/55 text-sm">Students who already showed interest in your profile.</p>
+    </header>
 
-        <div class="row g-4">
+    {% if likes %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {% for like in likes %}
-                <div class="col-md-6 col-xl-4">
-                    <article class="discover-card h-100">
-                        <h2 class="h4 text-white">{{ like.from_user.username }}</h2>
-                        <p class="text-white-50">{{ like.from_user.profile.college_name|default:"College not added" }}</p>
-                        <p class="text-white-75">{{ like.from_user.profile.bio|default:"No bio added yet." }}</p>
-                        <a class="btn btn-ghost w-100" href="{{ like.from_user.profile.get_absolute_url }}">View profile</a>
-                    </article>
-                </div>
-            {% empty %}
-                <div class="empty-state mx-auto text-center">
-                    <h2 class="h4 text-white">No likes yet</h2>
-                    <p class="text-white-50 mb-0">When students like you, they will appear here.</p>
-                </div>
+                <article class="glass-card p-5 hover:-translate-y-1 transition-transform">
+                    <div class="flex items-center gap-3 mb-4">
+                        {% if like.from_user.profile.profile_picture %}
+                            <img src="{{ like.from_user.profile.profile_picture.url }}" alt="" class="w-14 h-14 rounded-full object-cover ring-2 ring-pink-500/30" loading="lazy">
+                        {% else %}
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center font-bold text-lg">{{ like.from_user.username|slice:":1"|upper }}</div>
+                        {% endif %}
+                        <div>
+                            <h2 class="font-bold text-white">{{ like.from_user.username }}</h2>
+                            <p class="text-white/50 text-sm">{{ like.from_user.profile.college_name|default:"College not added" }}</p>
+                        </div>
+                    </div>
+                    <p class="text-white/65 text-sm line-clamp-2 mb-4">{{ like.from_user.profile.bio|default:"No bio yet." }}</p>
+                    <a class="btn-glass w-full text-center block" href="{{ like.from_user.profile.get_absolute_url }}">View profile</a>
+                </article>
             {% endfor %}
         </div>
-    </div>
+    {% else %}
+        <div class="glass-card max-w-md mx-auto p-10 text-center">
+            <h2 class="font-bold text-white mb-2">No likes yet</h2>
+            <p class="text-white/50 text-sm">When students like you, they appear here.</p>
+        </div>
+    {% endif %}
 </section>
 {% endblock %}

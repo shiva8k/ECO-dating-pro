@@ -3,95 +3,84 @@
 {% block title %}Explore | ECO{% endblock %}
 
 {% block content %}
-<section class="explore-section page-section">
-    <div class="container explore-container">
-        <div class="explore-header text-center mx-auto mb-4">
-            <p class="hero-kicker mx-auto mb-3">Explore campus</p>
-            <h1 class="display-6 fw-bold text-white mb-2">Discover your people</h1>
-            <p class="text-white-50 mb-0">
-                Swipe through students matched to your preferences.
-                {% if not can_like %}
-                    <span class="d-block mt-2 text-warning">Daily like limit reached — upgrade for unlimited likes.</span>
-                {% elif likes_remaining != "Unlimited" %}
-                    <span class="d-block mt-2">{{ likes_remaining }} likes left today</span>
-                {% endif %}
-            </p>
-        </div>
+<section class="py-8 sm:py-12 px-4 min-h-[calc(100vh-4.5rem)] flex flex-col items-center">
+    <header class="text-center max-w-lg mb-6 fade-in-up">
+        <p class="eco-kicker mb-2">Explore campus</p>
+        <h1 class="text-3xl sm:text-4xl font-black text-white mb-2">Discover your people</h1>
+        <p class="text-white/55 text-sm sm:text-base">
+            Swipe through students matched to your preferences.
+            {% if not can_like %}
+                <span class="block mt-2 text-amber-400 font-medium">Daily like limit reached — upgrade for unlimited likes.</span>
+            {% elif likes_remaining != "Unlimited" %}
+                <span class="block mt-1 text-white/45">{{ likes_remaining }} likes left today</span>
+            {% endif %}
+        </p>
+    </header>
 
-        {% if current_card %}
-            <div class="swipe-deck" id="swipeDeck">
-                <article class="swipe-card" id="swipeCard">
-                    <a class="swipe-card-media" href="{{ current_card.profile.get_absolute_url }}">
-                        {% if current_card.profile.profile_picture %}
-                            <img src="{{ current_card.profile.profile_picture.url }}" alt="{{ current_card.profile.user.username }}">
-                        {% else %}
-                            <div class="swipe-card-placeholder">{{ current_card.profile.user.username|slice:":1"|upper }}</div>
-                        {% endif %}
-                        <div class="swipe-card-gradient"></div>
-                    </a>
-
+    {% if current_card %}
+        <div class="w-full max-w-[22rem] sm:max-w-sm mx-auto fade-in-up" id="swipeDeck">
+            <article class="swipe-card shadow-2xl shadow-pink-500/10" id="swipeCard">
+                <a class="swipe-card-media block relative" href="{{ current_card.profile.get_absolute_url }}">
+                    {% if current_card.profile.profile_picture %}
+                        <img src="{{ current_card.profile.profile_picture.url }}" alt="{{ current_card.profile.user.username }}" loading="lazy" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="swipe-card-placeholder">{{ current_card.profile.user.username|slice:":1"|upper }}</div>
+                    {% endif %}
+                    <div class="swipe-card-gradient"></div>
                     <div class="swipe-card-body">
-                        <div class="swipe-card-topline">
-                            <h2 class="swipe-card-name">
+                        <div class="flex items-baseline justify-between gap-2">
+                            <h2 class="text-2xl font-black text-white">
                                 {{ current_card.profile.user.username }}{% if current_card.profile.age %}, {{ current_card.profile.age }}{% endif %}
                             </h2>
                             {% if current_card.remaining_count %}
-                                <span class="swipe-card-queue">+{{ current_card.remaining_count }} more</span>
+                                <span class="text-xs font-bold text-white/45">+{{ current_card.remaining_count }}</span>
                             {% endif %}
                         </div>
-                        <p class="swipe-card-meta">
+                        <p class="text-white/55 text-sm mt-1">
                             {{ current_card.profile.college_name|default:"College not added" }}
-                            {% if current_card.profile.get_looking_for_display_label %}
-                                · {{ current_card.profile.get_looking_for_display_label }}
-                            {% endif %}
+                            {% if current_card.profile.get_looking_for_display_label %} · {{ current_card.profile.get_looking_for_display_label }}{% endif %}
                         </p>
-                        <p class="swipe-card-bio">{{ current_card.profile.bio|default:"No bio yet." }}</p>
+                        <p class="text-white/75 text-sm mt-2 line-clamp-2">{{ current_card.profile.bio|default:"No bio yet." }}</p>
                         {% if current_card.interests %}
-                            <div class="swipe-card-chips">
-                                {% for interest in current_card.interests|slice:":6" %}
+                            <div class="flex flex-wrap gap-1.5 mt-3">
+                                {% for interest in current_card.interests|slice:":5" %}
                                     <span class="interest-chip">{{ interest }}</span>
                                 {% endfor %}
                             </div>
                         {% endif %}
                     </div>
-                </article>
+                </a>
+            </article>
 
-                <div class="swipe-actions">
-                    <form method="post" action="{% url 'react_to_profile' current_card.profile.user.username 'pass' %}" class="swipe-form swipe-form-pass">
-                        {% csrf_token %}
-                        <button class="swipe-btn swipe-btn-pass" type="submit" aria-label="Pass">
-                            <span aria-hidden="true">✕</span>
-                        </button>
-                    </form>
-                    <form method="post" action="{% url 'react_to_profile' current_card.profile.user.username 'like' %}" class="swipe-form swipe-form-like">
-                        {% csrf_token %}
-                        <button class="swipe-btn swipe-btn-like" type="submit" aria-label="Like" {% if not can_like %}disabled{% endif %}>
-                            <span aria-hidden="true">♥</span>
-                        </button>
-                    </form>
-                </div>
+            <div class="flex items-center justify-center gap-8 mt-6">
+                <form method="post" action="{% url 'react_to_profile' current_card.profile.user.username 'pass' %}" class="swipe-form swipe-form-pass">
+                    {% csrf_token %}
+                    <button class="swipe-btn swipe-btn-pass" type="submit" aria-label="Pass">✕</button>
+                </form>
+                <form method="post" action="{% url 'react_to_profile' current_card.profile.user.username 'like' %}" class="swipe-form swipe-form-like">
+                    {% csrf_token %}
+                    <button class="swipe-btn swipe-btn-like" type="submit" aria-label="Like" {% if not can_like %}disabled{% endif %}>♥</button>
+                </form>
             </div>
-        {% else %}
-            <div class="empty-state mx-auto text-center swipe-empty">
-                <h2 class="h4 text-white">You're all caught up</h2>
-                <p class="text-white-50 mb-4">No more compatible profiles right now. Check back when more students join ECO.</p>
-                <a class="btn btn-glass" href="{% url 'matches_page' %}">View matches</a>
-            </div>
-        {% endif %}
-    </div>
+        </div>
+    {% else %}
+        <div class="glass-card p-10 max-w-md text-center fade-in-up">
+            <h2 class="text-xl font-bold text-white mb-2">You're all caught up</h2>
+            <p class="text-white/50 text-sm mb-6">No more compatible profiles right now. Check back when more students join ECO.</p>
+            <a class="btn-glass" href="{% url 'matches_page' %}">View matches</a>
+        </div>
+    {% endif %}
 </section>
 {% if current_card %}
 <script>
 (function () {
     const card = document.getElementById('swipeCard');
-    const forms = document.querySelectorAll('.swipe-form');
-    forms.forEach((form) => {
-        form.addEventListener('submit', (event) => {
+    document.querySelectorAll('.swipe-form').forEach((form) => {
+        form.addEventListener('submit', (e) => {
             if (!card) return;
-            event.preventDefault();
-            const isLike = form.classList.contains('swipe-form-like');
-            card.classList.add(isLike ? 'swipe-out-like' : 'swipe-out-pass');
-            window.setTimeout(() => form.submit(), 280);
+            e.preventDefault();
+            card.classList.add(form.classList.contains('swipe-form-like') ? 'swipe-out-like' : 'swipe-out-pass');
+            setTimeout(() => form.submit(), 280);
         });
     });
 })();

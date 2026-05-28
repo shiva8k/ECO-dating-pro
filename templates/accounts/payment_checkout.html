@@ -3,17 +3,17 @@
 {% block title %}Checkout | ECO Premium{% endblock %}
 
 {% block content %}
-<section class="auth-section">
-    <div class="auth-card text-center">
-        <p class="hero-kicker mx-auto mb-3">Secure checkout</p>
-        <h1 class="h3 text-white mb-2">{{ plan.name }}</h1>
-        <p class="premium-price mb-4">₹{{ plan.price_inr }}<span>/month</span></p>
-        <button id="rzp-button" class="btn btn-glass w-100" type="button">Pay with Razorpay</button>
-        <a class="btn btn-ghost w-100 mt-3" href="{% url 'premium_plans' %}">Cancel</a>
+<section class="min-h-[calc(100vh-4.5rem)] flex items-center justify-center py-12 px-4 fade-in-up">
+    <div class="glass-card p-8 sm:p-10 w-full max-w-md text-center">
+        <p class="eco-kicker mb-2">Secure checkout</p>
+        <h1 class="text-2xl font-black text-white mb-2">{{ plan.name }}</h1>
+        <p class="text-4xl font-black gradient-text mb-6">₹{{ plan.price_inr }}</p>
+        <button id="rzp-button" class="btn-premium w-full mb-3" type="button">Pay with Razorpay</button>
+        <a class="btn-ghost w-full inline-flex justify-center" href="{% url 'premium_plans' %}">Cancel</a>
     </div>
 </section>
 
-<form id="payment-success-form" method="post" action="{% url 'payment_success' %}" class="d-none">
+<form id="payment-success-form" method="post" action="{% url 'payment_success' %}" class="hidden">
     {% csrf_token %}
     <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
     <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
@@ -41,7 +41,7 @@
             }
         },
         theme: {
-            color: "#5865f2"
+            color: "#ec4899"
         }
     };
 

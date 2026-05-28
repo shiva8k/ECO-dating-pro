@@ -3,18 +3,25 @@
 {% block title %}Edit Profile | ECO{% endblock %}
 
 {% block content %}
-<section class="auth-section profile-edit-section">
-    <div class="auth-card profile-edit-card">
-        <h1 class="h3 text-white mb-2">Edit your ECO profile</h1>
-        <p class="text-white-50 mb-4">Update how you show up on campus and in explore.</p>
+<section class="py-10 sm:py-14 px-4 max-w-2xl mx-auto min-h-[calc(100vh-4.5rem)] fade-in-up">
+    <header class="text-center mb-8">
+        <p class="eco-kicker mb-2">Your profile</p>
+        <h1 class="text-3xl font-black text-white mb-1">Edit profile</h1>
+        <p class="text-white/55 text-sm">Update how you show up on campus and in explore.</p>
+    </header>
 
-        <form method="post" enctype="multipart/form-data">
+    <div class="glass-card p-6 sm:p-8">
+        <div id="photoPreviewWrap" class="mb-6 text-center {% if not profile.profile_picture %}hidden{% endif %}">
+            <img id="photoPreview" src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% endif %}" alt="Preview" class="w-32 h-32 rounded-3xl object-cover mx-auto ring-2 ring-pink-500/40 shadow-lg">
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-5">
             {% csrf_token %}
             {% for field in form %}
-                <div class="mb-3 {% if field.name == 'interest_selection' %}profile-interests-edit{% endif %}">
-                    <label class="form-label text-white" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div class="{% if field.name == 'interest_selection' %}space-y-3{% endif %}">
+                    <label class="block text-sm font-semibold text-white/85 mb-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {% if field.name == 'interest_selection' %}
-                        <div class="onboarding-chip-grid profile-edit-chips">
+                        <div class="onboarding-chip-grid">
                             {% for checkbox in field %}
                                 <label class="onboarding-chip">{{ checkbox.tag }}<span>{{ checkbox.choice_label }}</span></label>
                             {% endfor %}
@@ -25,26 +32,28 @@
                                 <label class="onboarding-choice-card">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
                             {% endfor %}
                         </div>
+                    {% elif field.name == 'profile_picture' %}
+                        <label class="onboarding-photo-drop block cursor-pointer">
+                            <span class="text-3xl text-pink-400 font-light">+</span>
+                            <span class="text-sm text-white/60">Tap to upload a new photo</span>
+                            {{ field }}
+                        </label>
                     {% else %}
                         {{ field }}
                     {% endif %}
-                    {% if field.help_text %}
-                        <div class="form-text text-white-50">{{ field.help_text }}</div>
-                    {% endif %}
-                    {% for error in field.errors %}
-                        <div class="text-danger small mt-1">{{ error }}</div>
-                    {% endfor %}
+                    {% if field.help_text %}<p class="text-white/45 text-xs mt-1">{{ field.help_text }}</p>{% endif %}
+                    {% for error in field.errors %}<p class="text-pink-400 text-sm mt-1">{{ error }}</p>{% endfor %}
                 </div>
             {% endfor %}
-            <div class="d-flex flex-wrap gap-3 mt-4">
-                <button class="btn btn-glass" type="submit">Save profile</button>
-                <a class="btn btn-ghost" href="{% url 'my_profile' %}">Cancel</a>
+            <div class="flex flex-wrap gap-3 pt-4">
+                <button class="btn-premium flex-1 min-w-[10rem]" type="submit">Save profile</button>
+                <a class="btn-ghost" href="{% url 'my_profile' %}">Cancel</a>
             </div>
         </form>
     </div>
 </section>
 <script>
-document.querySelectorAll('.profile-edit-chips .onboarding-chip input, .onboarding-choice-card input').forEach((input) => {
+document.querySelectorAll('.onboarding-chip input, .onboarding-choice-card input').forEach((input) => {
     const sync = () => {
         if (input.type === 'radio') {
             document.querySelectorAll(`input[name="${input.name}"]`).forEach((el) => {
@@ -57,5 +66,16 @@ document.querySelectorAll('.profile-edit-chips .onboarding-chip input, .onboardi
     input.addEventListener('change', sync);
     sync();
 });
+const fileInput = document.querySelector('input[type="file"][name="profile_picture"]');
+const preview = document.getElementById('photoPreview');
+const wrap = document.getElementById('photoPreviewWrap');
+if (fileInput && preview) {
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files?.[0];
+        if (!file) return;
+        preview.src = URL.createObjectURL(file);
+        wrap?.classList.remove('hidden');
+    });
+}
 </script>
 {% endblock %}

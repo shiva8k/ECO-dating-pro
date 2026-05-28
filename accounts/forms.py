@@ -2,17 +2,39 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import AuthenticationForm
 
 from .matching import INTEREST_CHOICES, INTEREST_SLUGS
 from .models import Profile
 
 
 class SignUpForm(UserCreationForm):
-    email = forms.EmailField(required=True, help_text="Use your college email if you have one.")
+    email = forms.EmailField(
+        required=True,
+        help_text="Use your college email if you have one.",
+        widget=forms.EmailInput(attrs={
+            'class': 'w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all'
+        })
+    )
 
     class Meta:
         model = User
         fields = ("username", "email", "password1", "password2")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({
+            'class': 'w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all',
+            'placeholder': 'Username'
+        })
+        self.fields['password1'].widget.attrs.update({
+            'class': 'w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all',
+            'placeholder': 'Password'
+        })
+        self.fields['password2'].widget.attrs.update({
+            'class': 'w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all',
+            'placeholder': 'Confirm Password'
+        })
 
 
 class ProfileForm(forms.ModelForm):
@@ -40,11 +62,23 @@ class ProfileForm(forms.ModelForm):
                 attrs={
                     "rows": 4,
                     "placeholder": "Tell campus what you are into, what you are building, or who you want to meet.",
+                    "class": "w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
                 }
             ),
-            "college_name": forms.TextInput(attrs={"placeholder": "Example: ECO Institute of Technology"}),
-            "department": forms.TextInput(attrs={"placeholder": "Example: Computer Science"}),
-            "age": forms.NumberInput(attrs={"min": 16, "max": 100, "placeholder": "20"}),
+            "college_name": forms.TextInput(attrs={
+                "placeholder": "Example: ECO Institute of Technology",
+                "class": "w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+            }),
+            "department": forms.TextInput(attrs={
+                "placeholder": "Example: Computer Science",
+                "class": "w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+            }),
+            "age": forms.NumberInput(attrs={
+                "min": 16,
+                "max": 100,
+                "placeholder": "20",
+                "class": "w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+            }),
             "gender": forms.RadioSelect,
             "interested_in": forms.RadioSelect,
             "looking_for": forms.RadioSelect,
@@ -58,7 +92,8 @@ class ProfileForm(forms.ModelForm):
             self.fields["interest_selection"].initial = self.instance.get_interest_list()
         for field in self.fields.values():
             if hasattr(field.widget, "attrs"):
-                field.widget.attrs.setdefault("class", "form-control")
+                if "class" not in field.widget.attrs:
+                    field.widget.attrs.setdefault("class", "w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all")
 
     def save(self, commit=True):
         profile = super().save(commit=False)
@@ -74,9 +109,9 @@ class OnboardingStepOneForm(forms.ModelForm):
         model = Profile
         fields = ("gender", "interested_in", "looking_for", "age")
         widgets = {
-            "gender": forms.RadioSelect,
-            "interested_in": forms.RadioSelect,
-            "looking_for": forms.RadioSelect,
+           "gender": forms.RadioSelect(),
+            "interested_in": forms.RadioSelect(),
+            "looking_for": forms.RadioSelect(),
             "age": forms.NumberInput(attrs={"min": 16, "max": 100, "placeholder": "Your age"}),
         }
 
@@ -149,3 +184,38 @@ class OnboardingStepFourForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["profile_picture"].required = True
+
+from django.contrib.auth.forms import AuthenticationForm
+
+class LoginForm(AuthenticationForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['username'].widget.attrs.update({
+            'class': 'w-full px-4 py-3 rounded-lg bg-white/5 border border-pink-500/30 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all',
+            'placeholder': 'Enter username'
+        })
+
+        self.fields['password'].widget.attrs.update({
+            'class': 'w-full px-4 py-3 rounded-lg bg-white/5 border border-pink-500/30 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all',
+            'placeholder': 'Enter password'
+        })
+
+
+
+class LoginForm(AuthenticationForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['username'].widget.attrs.update({
+            'class': 'w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all',
+            'placeholder': 'Enter username'
+        })
+
+        self.fields['password'].widget.attrs.update({
+            'class': 'w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all',
+            'placeholder': 'Enter password'
+        })
+

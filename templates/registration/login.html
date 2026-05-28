@@ -3,30 +3,29 @@
 {% block title %}Log in | ECO{% endblock %}
 
 {% block content %}
-<section class="auth-section">
-    <div class="auth-card">
-        <h1 class="h3 mb-2">Welcome back</h1>
-        <p class="text-muted mb-4">Log in to keep building your campus circle.</p>
-        <form method="post">
+<section class="min-h-[calc(100vh-4.5rem)] flex items-center justify-center py-12 px-4 fade-in-up">
+    <div class="glass-card p-8 sm:p-10 w-full max-w-md">
+        <div class="text-center mb-8">
+            <p class="eco-kicker mb-2">Welcome back</p>
+            <h1 class="text-3xl font-black gradient-text">Log in to ECO</h1>
+            <p class="text-white/55 text-sm mt-2">Continue your campus circle.</p>
+        </div>
+        <form method="post" class="space-y-5">
             {% csrf_token %}
             {% for field in form %}
-                <div class="mb-3">
-                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div>
+                    <label class="block text-sm font-semibold text-white/85 mb-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field }}
-                    {% for error in field.errors %}
-                        <div class="text-danger small mt-1">{{ error }}</div>
-                    {% endfor %}
+                    {% for error in field.errors %}<p class="text-pink-400 text-sm mt-1">{{ error }}</p>{% endfor %}
                 </div>
             {% endfor %}
             {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {{ form.non_field_errors }}
-                </div>
+                <div class="rounded-2xl bg-red-500/15 border border-red-500/30 p-3 text-red-200 text-sm">{{ form.non_field_errors }}</div>
             {% endif %}
-            <button class="btn btn-eco w-100" type="submit">Log in</button>
+            <button type="submit" class="btn-premium w-full">Log in</button>
         </form>
-        <p class="mt-4 mb-0 text-center">
-            New to ECO? <a href="{% url 'signup' %}">Create an account</a>
+        <p class="mt-8 text-center text-white/55 text-sm">
+            New to ECO? <a href="{% url 'signup' %}" class="text-pink-400 font-semibold hover:text-pink-300">Create an account</a>
         </p>
     </div>
 </section>

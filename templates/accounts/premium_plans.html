@@ -3,48 +3,52 @@
 {% block title %}ECO Premium{% endblock %}
 
 {% block content %}
-<section class="page-section">
-    <div class="container">
-        <div class="page-heading text-center mx-auto mb-5">
-            <p class="hero-kicker mx-auto mb-3">ECO Premium</p>
-            <h1 class="display-5 fw-bold text-white mb-3">Unlock your campus edge</h1>
-            <p class="text-white-75 mb-0">Unlimited likes, see who liked you, profile boost, and a premium badge.</p>
+<section class="py-10 sm:py-16 px-4 max-w-5xl mx-auto min-h-[calc(100vh-4.5rem)]">
+    <header class="text-center max-w-2xl mx-auto mb-10 fade-in-up">
+        <p class="eco-kicker mb-2">ECO Premium</p>
+        <h1 class="text-3xl sm:text-4xl font-black text-white mb-3">
+            Unlock your <span class="gradient-text">campus edge</span>
+        </h1>
+        <p class="text-white/55">Unlimited likes, see who liked you, profile boost, and a premium badge.</p>
+    </header>
+
+    {% if subscription.is_valid %}
+        <div class="glass-card max-w-md mx-auto p-5 mb-8 text-center border-amber-400/30 shadow-[0_0_30px_rgba(251,191,36,0.15)] fade-in-up">
+            <p class="font-bold text-amber-300">Premium active</p>
+            <p class="text-white/55 text-sm mt-1">Expires {{ subscription.expires_at|date:"M d, Y" }}</p>
         </div>
+    {% endif %}
 
-        {% if subscription.is_valid %}
-            <div class="premium-status mx-auto mb-4">
-                <strong>Premium active</strong>
-                <span>Expires {{ subscription.expires_at|date:"M d, Y" }}</span>
-            </div>
-        {% endif %}
+    <ul class="flex flex-wrap justify-center gap-3 mb-10 text-sm text-white/70 fade-in-up">
+        <li class="px-4 py-2 rounded-full bg-white/5 border border-white/10">♾ Unlimited likes</li>
+        <li class="px-4 py-2 rounded-full bg-white/5 border border-white/10">👀 Who liked you</li>
+        <li class="px-4 py-2 rounded-full bg-white/5 border border-white/10">🚀 Profile boost</li>
+        <li class="px-4 py-2 rounded-full bg-white/5 border border-white/10">⭐ Premium badge</li>
+    </ul>
 
-        <div class="row g-4 justify-content-center">
+    {% if plans %}
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
             {% for plan in plans %}
-                <div class="col-md-6 col-xl-4">
-                    <article class="premium-card h-100">
-                        <p class="hero-kicker mb-3">{{ plan.duration_days }} days</p>
-                        <h2 class="h3 text-white">{{ plan.name }}</h2>
-                        <p class="premium-price">₹{{ plan.price_inr }}<span>/month</span></p>
-                        <p class="text-white-75">{{ plan.description }}</p>
-                        <ul class="premium-feature-list">
-                            <li>Unlimited likes</li>
-                            <li>See who liked you</li>
-                            <li>Profile boost</li>
-                            <li>Premium badge</li>
-                        </ul>
-                        <form method="post" action="{% url 'create_premium_order' plan.id %}">
-                            {% csrf_token %}
-                            <button class="btn btn-glass w-100" type="submit">Upgrade with Razorpay</button>
-                        </form>
-                    </article>
-                </div>
-            {% empty %}
-                <div class="empty-state mx-auto text-center">
-                    <h2 class="h4 text-white">No premium plans yet</h2>
-                    <p class="text-white-50 mb-0">Create an active `PremiumPlan` in Django admin.</p>
-                </div>
+                <article class="glass-card w-full max-w-sm p-6 sm:p-8 text-center hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_0_40px_rgba(236,72,153,0.2)] hover:border-pink-500/30 fade-in-up">
+                    <div class="inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-amber-400/20 to-yellow-500/20 text-amber-200 border border-amber-400/30 mb-4">
+                        {{ plan.duration_days }} days
+                    </div>
+                    <h2 class="text-2xl font-black text-white mb-2">{{ plan.name }}</h2>
+                    <p class="text-4xl font-black gradient-text mb-1">₹{{ plan.price_inr }}</p>
+                    <p class="text-white/40 text-xs mb-4">per billing period</p>
+                    <p class="text-white/60 text-sm mb-6 min-h-[3rem]">{{ plan.description }}</p>
+                    <form method="post" action="{% url 'create_premium_order' plan.id %}">
+                        {% csrf_token %}
+                        <button class="btn-premium w-full !py-3" type="submit">Upgrade with Razorpay</button>
+                    </form>
+                </article>
             {% endfor %}
         </div>
-    </div>
+    {% else %}
+        <div class="glass-card max-w-md mx-auto p-10 text-center">
+            <h2 class="text-xl font-bold text-white mb-2">No plans available</h2>
+            <p class="text-white/50 text-sm">Create an active PremiumPlan in Django admin.</p>
+        </div>
+    {% endif %}
 </section>
 {% endblock %}

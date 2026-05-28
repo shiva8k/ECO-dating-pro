@@ -16,7 +16,8 @@ def unread_notifications(request):
             is_read=False,
         ).count()
         recent_notifications = list(
-            Notification.objects.filter(recipient=request.user).select_related("sender")[:5]
+            Notification.objects.filter(recipient=request.user)
+            .select_related("sender", "sender__profile")[:8]
         )
     except DatabaseError:
         return {
