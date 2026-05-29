@@ -24,7 +24,10 @@ if IS_VERCEL and SECRET_KEY.startswith("django-insecure"):
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,.vercel.app").split(",")
+    for host in os.environ.get(
+        "ALLOWED_HOSTS",
+        "localhost,127.0.0.1,.onrender.com"
+    ).split(",")
     if host.strip()
 ]
 
